@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Product;
+use App\Models\Sale;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -18,5 +20,8 @@ class DatabaseSeeder extends Seeder
             'name' => 'Sales Agent',
             'email' => 'sales@coffee.shop',
         ]);
+
+        Product::factory()->create();
+        Sale::factory()->count(10)->create();
     }
 }

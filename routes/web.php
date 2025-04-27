@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SaleController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,12 +20,14 @@ Route::get('/', function () {
 
 Route::redirect('/dashboard', '/sales');
 
-Route::get('/sales', function () {
-    return view('coffee_sales');
-})->middleware(['auth'])->name('coffee.sales');
+Route::middleware('auth')->group(function () {
+    Route::get('/sales/', [SaleController::class, 'index'])->name('sales.index');
+    Route::post('/sales/create', [SaleController::class, 'create'])->name('sales.create');
+    Route::post('/sales/calculate-selling-price', [SaleController::class, 'calculateSellingPrice'])->name('sales.calculateSellingPrice');
+});
 
 Route::get('/shipping-partners', function () {
-    return view('shipping_partners');
+    return view('shipping-partners');
 })->middleware(['auth'])->name('shipping.partners');
 
 require __DIR__.'/auth.php';
