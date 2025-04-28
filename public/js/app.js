@@ -5147,13 +5147,18 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 function setupSale() {
-  var quantityInput = document.getElementById('quantity');
-  var unitCostInput = document.getElementById('unit-cost');
-  var sellingPriceOutput = document.querySelector('.selling-price-output');
-  var sellingPriceSpinner = document.querySelector('.selling-price-spinner');
-  var recordSaleBtn = document.getElementById('record-sale-btn');
-  var errorMessage = document.getElementById('error-message');
-  var salesTable = document.querySelector('table tbody');
+  var elements = {
+    product: document.getElementById('product'),
+    quantity: document.getElementById('quantity'),
+    unitCost: document.getElementById('unit-cost'),
+    sellingPriceOutput: document.querySelector('.selling-price-output'),
+    sellingPriceSpinner: document.querySelector('.selling-price-spinner'),
+    recordSaleBtn: document.getElementById('record-sale-btn'),
+    errorMessage: document.getElementById('error-message'),
+    salesTable: document.querySelector('table tbody'),
+    salesTableElement: document.getElementById('sales-table'),
+    noSalesMessage: document.getElementById('no-sales-message')
+  };
   var debounceTimeout = null;
 
   var isValidInteger = function isValidInteger(value) {
@@ -5164,40 +5169,53 @@ function setupSale() {
     return /^-?\d+(\.\d{1,2})?$/.test(value);
   };
 
-  var clearInputs = function clearInputs() {
-    quantityInput.value = '';
-    unitCostInput.value = '';
-    sellingPriceOutput.textContent = '';
+  var disableRecordSaleBtn = function disableRecordSaleBtn() {
+    return elements.recordSaleBtn.disabled = true;
   };
 
-  var handleValidation = function handleValidation(quantity, unitCost) {
-    var clearSellingPrice = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-    sellingPriceSpinner.style.display = 'none';
+  var enableRecordSaleBtn = function enableRecordSaleBtn() {
+    return elements.recordSaleBtn.disabled = false;
+  };
 
-    if (!isValidInteger(quantity)) {
-      errorMessage.textContent = "Quantity must be a valid integer.";
-      if (clearSellingPrice) sellingPriceOutput.textContent = '';
-      return false;
+  var clearInputs = function clearInputs() {
+    elements.product.value = '';
+    elements.quantity.value = '';
+    elements.unitCost.value = '';
+    elements.sellingPriceOutput.textContent = '';
+  };
+
+  var handleValidation = function handleValidation(product, quantity, unitCost) {
+    elements.sellingPriceSpinner.style.display = 'none';
+    var validations = [{
+      valid: isValidInteger(product),
+      message: "Please select a product"
+    }, {
+      valid: isValidInteger(quantity),
+      message: "Quantity must be an integer"
+    }, {
+      valid: isValidFloat(unitCost),
+      message: "Unit cost must be a valid number with up to 2 decimal places."
+    }];
+
+    for (var _i = 0, _validations = validations; _i < _validations.length; _i++) {
+      var _validations$_i = _validations[_i],
+          valid = _validations$_i.valid,
+          message = _validations$_i.message;
+
+      if (!valid) {
+        disableRecordSaleBtn();
+        elements.errorMessage.textContent = message;
+        elements.sellingPriceOutput.textContent = '';
+        return false;
+      }
     }
 
-    if (!isValidFloat(unitCost)) {
-      errorMessage.textContent = "Unit cost must be a valid number with up to 2 decimal places.";
-      if (clearSellingPrice) sellingPriceOutput.textContent = '';
-      return false;
-    }
-
-    errorMessage.textContent = '';
+    elements.errorMessage.textContent = '';
     return true;
   };
 
   var handleFetchErrors = function handleFetchErrors(response, data) {
-    if (response.status === 422 && data.errors) {
-      errorMessage.textContent = Object.values(data.errors).flat().join(' ');
-    } else if (data.error) {
-      errorMessage.textContent = data.error;
-    } else {
-      errorMessage.textContent = 'An unexpected error occurred.';
-    }
+    elements.errorMessage.textContent = response.status === 422 && data.errors ? Object.values(data.errors).flat().join(' ') : data.error || 'An unexpected error occurred.';
   };
 
   var postData = /*#__PURE__*/function () {
@@ -5213,7 +5231,7 @@ function setupSale() {
                 headers: {
                   'Content-Type': 'application/json',
                   'Accept': 'application/json',
-                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
                 body: JSON.stringify(payload)
               });
@@ -5243,23 +5261,36 @@ function setupSale() {
     };
   }();
 
+  var getInputValues = function getInputValues() {
+    return {
+      product: elements.product.value.trim(),
+      quantity: elements.quantity.value.trim(),
+      unitCost: elements.unitCost.value.trim()
+    };
+  };
+
+  var resetSellingPrice = function resetSellingPrice() {
+    elements.sellingPriceSpinner.style.display = 'none';
+    elements.sellingPriceOutput.textContent = '';
+  };
+
   function createSale(_x3) {
     return _createSale.apply(this, arguments);
   }
 
   function _createSale() {
     _createSale = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2(e) {
-      var quantity, unitCost, _yield$postData, response, data, newSaleRow;
+      var _getInputValues2, product, quantity, unitCost, _yield$postData, response, data, newSaleRow;
 
       return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
         while (1) {
           switch (_context2.prev = _context2.next) {
             case 0:
               e.preventDefault();
-              quantity = quantityInput.value.trim();
-              unitCost = unitCostInput.value.trim();
+              disableRecordSaleBtn();
+              _getInputValues2 = getInputValues(), product = _getInputValues2.product, quantity = _getInputValues2.quantity, unitCost = _getInputValues2.unitCost;
 
-              if (handleValidation(quantity, unitCost)) {
+              if (handleValidation(product, quantity, unitCost)) {
                 _context2.next = 5;
                 break;
               }
@@ -5270,6 +5301,7 @@ function setupSale() {
               _context2.prev = 5;
               _context2.next = 8;
               return postData('/sales/create', {
+                product_id: parseInt(product),
                 quantity: parseInt(quantity),
                 unit_cost: parseFloat(unitCost).toFixed(2)
               });
@@ -5289,23 +5321,33 @@ function setupSale() {
 
             case 14:
               newSaleRow = document.createElement('tr');
-              newSaleRow.innerHTML = "\n                <td class=\"border border-gray-300 px-4 py-2\">".concat(data.quantity, "</td>\n                <td class=\"border border-gray-300 px-4 py-2\">\xA3").concat(data.unit_cost.toFixed(2), "</td>\n                <td class=\"border border-gray-300 px-4 py-2\">\xA3").concat(data.selling_price.toFixed(2), "</td>\n            ");
-              salesTable.insertBefore(newSaleRow, salesTable.firstChild);
+              newSaleRow.innerHTML = "\n                <td class=\"border border-gray-300 px-4 py-2\">".concat(data.product_name, "</td>\n                <td class=\"border border-gray-300 px-4 py-2\">").concat(data.quantity, "</td>\n                <td class=\"border border-gray-300 px-4 py-2\">\xA3").concat(data.unit_cost.toFixed(2), "</td>\n                <td class=\"border border-gray-300 px-4 py-2\">\xA3").concat(data.selling_price.toFixed(2), "</td>\n                <td class=\"border border-gray-300 px-4 py-2\">").concat(data.created_at, "</td>\n            ");
+              elements.salesTable.insertBefore(newSaleRow, elements.salesTable.firstChild);
+
+              if (elements.salesTableElement && elements.salesTableElement.classList.contains('hidden')) {
+                elements.salesTableElement.classList.remove('hidden');
+              }
+
+              if (elements.noSalesMessage) {
+                elements.noSalesMessage.remove();
+              }
+
               clearInputs();
-              _context2.next = 23;
+              resetSellingPrice();
+              _context2.next = 26;
               break;
 
-            case 20:
-              _context2.prev = 20;
-              _context2.t0 = _context2["catch"](5);
-              errorMessage.textContent = 'An unexpected error occurred.';
-
             case 23:
+              _context2.prev = 23;
+              _context2.t0 = _context2["catch"](5);
+              elements.errorMessage.textContent = 'An unexpected error occurred.';
+
+            case 26:
             case "end":
               return _context2.stop();
           }
         }
-      }, _callee2, null, [[5, 20]]);
+      }, _callee2, null, [[5, 23]]);
     }));
     return _createSale.apply(this, arguments);
   }
@@ -5316,26 +5358,27 @@ function setupSale() {
 
   function _calculateSellingPrice() {
     _calculateSellingPrice = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
-      var quantity, unitCost, _yield$postData2, response, data;
+      var _getInputValues3, product, quantity, unitCost, _yield$postData2, response, data;
 
       return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
         while (1) {
           switch (_context3.prev = _context3.next) {
             case 0:
-              quantity = quantityInput.value.trim();
-              unitCost = unitCostInput.value.trim();
+              _getInputValues3 = getInputValues(), product = _getInputValues3.product, quantity = _getInputValues3.quantity, unitCost = _getInputValues3.unitCost;
 
-              if (handleValidation(quantity, unitCost, true)) {
+              if (handleValidation(product, quantity, unitCost)) {
                 _context3.next = 4;
                 break;
               }
 
+              resetSellingPrice();
               return _context3.abrupt("return");
 
             case 4:
               _context3.prev = 4;
               _context3.next = 7;
               return postData('/sales/calculate-selling-price', {
+                product_id: parseInt(product),
                 quantity: parseInt(quantity),
                 unit_cost: parseFloat(unitCost).toFixed(2)
               });
@@ -5346,48 +5389,65 @@ function setupSale() {
               data = _yield$postData2.data;
 
               if (response.ok) {
-                _context3.next = 13;
+                _context3.next = 14;
                 break;
               }
 
               handleFetchErrors(response, data);
+              resetSellingPrice();
               return _context3.abrupt("return");
 
-            case 13:
-              sellingPriceSpinner.style.display = 'none';
-              sellingPriceOutput.textContent = "\xA3".concat(data.selling_price.toFixed(2));
-              _context3.next = 22;
+            case 14:
+              elements.sellingPriceSpinner.style.display = 'none';
+              elements.errorMessage.textContent = '';
+              elements.sellingPriceOutput.textContent = "\xA3".concat(data.selling_price.toFixed(2));
+              _context3.next = 23;
               break;
 
-            case 17:
-              _context3.prev = 17;
+            case 19:
+              _context3.prev = 19;
               _context3.t0 = _context3["catch"](4);
-              sellingPriceSpinner.style.display = 'none';
-              sellingPriceOutput.textContent = '';
-              errorMessage.textContent = 'An unexpected error occurred.';
+              elements.errorMessage.textContent = 'An unexpected error occurred.';
+              resetSellingPrice();
 
-            case 22:
+            case 23:
+              _context3.prev = 23;
+              enableRecordSaleBtn(); // always re-enable button at the end
+
+              return _context3.finish(23);
+
+            case 26:
             case "end":
               return _context3.stop();
           }
         }
-      }, _callee3, null, [[4, 17]]);
+      }, _callee3, null, [[4, 19, 23, 26]]);
     }));
     return _calculateSellingPrice.apply(this, arguments);
   }
 
   var debounceCalculateSellingPrice = function debounceCalculateSellingPrice() {
-    // Show spinner while loading
-    sellingPriceOutput.textContent = '';
-    errorMessage.textContent = '';
-    sellingPriceSpinner.style.display = 'block';
-    clearTimeout(debounceTimeout);
-    debounceTimeout = setTimeout(calculateSellingPrice, 1000);
-  };
+    var _getInputValues = getInputValues(),
+        product = _getInputValues.product,
+        quantity = _getInputValues.quantity,
+        unitCost = _getInputValues.unitCost;
 
-  quantityInput.addEventListener('keyup', debounceCalculateSellingPrice);
-  unitCostInput.addEventListener('keyup', debounceCalculateSellingPrice);
-  recordSaleBtn.addEventListener('click', createSale);
+    elements.errorMessage.textContent = '';
+
+    if (product && quantity && unitCost) {
+      disableRecordSaleBtn();
+      elements.sellingPriceOutput.textContent = '';
+      elements.sellingPriceSpinner.style.display = 'block';
+      clearTimeout(debounceTimeout);
+      debounceTimeout = setTimeout(calculateSellingPrice, 1000);
+    }
+  }; // When input fields change calculate selling price
+
+
+  elements.product.addEventListener('change', debounceCalculateSellingPrice);
+  elements.quantity.addEventListener('keyup', debounceCalculateSellingPrice);
+  elements.unitCost.addEventListener('keyup', debounceCalculateSellingPrice);
+  elements.recordSaleBtn.addEventListener('click', createSale);
 }
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (setupSale);

@@ -20,6 +20,11 @@ class Sale extends Model
         'selling_price',
     ];
 
+    public function getCreatedAtFormattedAttribute()
+    {
+        return $this->created_at->format('Y-m-d H:i');
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

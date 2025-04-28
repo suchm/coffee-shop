@@ -22,6 +22,12 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Product::factory()->create();
-        Sale::factory()->count(10)->create();
+        Product::create([
+            'name' => 'Arabic coffee',
+            'profit_margin' => 0.15,
+            'shipping_cost' => 1000, // In pence
+        ]);
+
+//        Sale::factory()->count(10)->create();
     }
 }

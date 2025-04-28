@@ -6,6 +6,7 @@ use App\Http\Requests\SaleRequest;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Services\SaleService;
+use Carbon\Carbon;
 use InvalidArgumentException;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,8 +14,13 @@ class SaleController extends Controller
 {
     public function index()
     {
-        $sales = Sale::select('quantity', 'unit_cost', 'selling_price')
-            ->orderBy('created_at', 'desc')
+        $sales = Sale::select('sales.quantity', 'sales.unit_cost', 'sales.selling_price', 'sales.created_at', 'products.name as product_name')
+            ->join('products', 'products.id', '=', 'sales.product_id')
+            ->orderBy('sales.created_at', 'desc')
+            ->get();
+
+        $products = Product::select('id','name')
+            ->orderBy('name', 'asc')
             ->get();
 
         // Convert unit cost and selling price to pounds
@@ -24,14 +30,14 @@ class SaleController extends Controller
             return $sale;
         });
 
-        return view('coffee-sales', compact('sales'));
+        return view('coffee-sales', compact('sales','products'));
     }
 
     public function create(SaleRequest $request)
     {
         $data = $request->validated();
 
-        $product = Product::first();
+        $product = Product::find($data['product_id']);
 
         if (!$product) {
             return response()->json(['error' => 'No product found.'], 404);
@@ -56,9 +62,11 @@ class SaleController extends Controller
             ]);
 
             return response()->json([
+                'product_name' => $sale->product->name,
                 'quantity' => $sale->quantity,
                 'unit_cost' => $sale->unit_cost / 100, // convert back to pounds
                 'selling_price' => $sale->selling_price / 100, // convert back to pounds
+                'created_at' => $sale->created_at_formatted,
             ]);
 
         } catch (InvalidArgumentException $e) {
@@ -78,7 +86,7 @@ class SaleController extends Controller
         try {
             $data = $request->validated();
 
-            $product = Product::first();
+            $product = Product::find($data['product_id']);
 
             if (!$product) {
                 return response()->json(['error' => 'No product found.'], 404);

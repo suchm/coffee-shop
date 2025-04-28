@@ -40,8 +40,12 @@ class SaleControllerTest extends TestCase
         $this->actingAs($user);
 
         // Arrange
-        $product = Product::factory()->create();
+        $product = Product::factory()->create([
+            'name' => 'Gold coffee',
+        ]);
+
         $data = [
+            'product_id' => $product->id,
             'quantity' => 10,
             'unit_cost' => 5.00,
         ];
@@ -52,6 +56,7 @@ class SaleControllerTest extends TestCase
         // Assert
         $response->assertStatus(200);
         $response->assertJson([
+            'product_name' => 'Gold coffee',
             'quantity' => 10,
             'unit_cost' => 5.00,
             'selling_price' => 76.67,
@@ -67,15 +72,21 @@ class SaleControllerTest extends TestCase
         Product::query()->delete();
 
         $data = [
+            'product_id' => 9999, // Product doesn't exist
             'quantity' => 10,
             'unit_cost' => 5.00,
         ];
 
         $response = $this->postJson(route('sales.create'), $data);
 
-        $response->assertStatus(404);
+        $response->assertStatus(422);
         $response->assertJson([
-            'error' => 'No product found.',
+            'message' => 'The selected product id is invalid.',
+            'errors' => [
+                'product_id' => [
+                    'The selected product id is invalid.',
+                ],
+            ],
         ]);
     }
 
@@ -86,6 +97,7 @@ class SaleControllerTest extends TestCase
 
         $product = Product::factory()->create();
         $data = [
+            'product_id' => $product->id,
             'quantity' => -10,
             'unit_cost' => 'invalid',
         ];
@@ -108,6 +120,7 @@ class SaleControllerTest extends TestCase
 
         $product = Product::factory()->create();
         $data = [
+            'product_id' => $product->id,
             'quantity' => 10,
             'unit_cost' => 5.00,
         ];
@@ -128,15 +141,21 @@ class SaleControllerTest extends TestCase
         Product::query()->delete();
 
         $data = [
+            'product_id' => 9999,
             'quantity' => 10,
             'unit_cost' => 5.00,
         ];
 
         $response = $this->postJson(route('sales.calculateSellingPrice'), $data);
 
-        $response->assertStatus(404);
+        $response->assertStatus(422);
         $response->assertJson([
-            'error' => 'No product found.',
+            'message' => 'The selected product id is invalid.',
+            'errors' => [
+                'product_id' => [
+                    'The selected product id is invalid.',
+                ],
+            ],
         ]);
     }
 

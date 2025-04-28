@@ -21,7 +21,7 @@ class SaleFactory extends Factory
     public function definition(): array
     {
         $user = User::first() ?? User::factory()->create();
-        $product = Product::first() ?? Product::factory()->create();
+        $product = Product::inRandomOrder()->first() ?? Product::factory()->create();
 
         $quantity = $this->faker->numberBetween(1, 10);
         $unitCost = money($this->faker->randomFloat(2, 10, 30) * 100); // Convert to pence
@@ -41,6 +41,7 @@ class SaleFactory extends Factory
             'profit_margin' => $product->profit_margin,
             'shipping_cost' => $product->shipping_cost,
             'selling_price' => round($sellingPrice->getAmount()),
+            'created_at'    => $this->faker->dateTimeBetween('-1 year'),
         ];
     }
 }
