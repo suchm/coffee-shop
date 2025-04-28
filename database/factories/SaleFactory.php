@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Product;
 use App\Models\User;
-
 use App\Services\SaleService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -34,14 +33,14 @@ class SaleFactory extends Factory
         );
 
         return [
-            'user_id'       => $user->id,
-            'product_id'    => $product->id,
-            'quantity'      => $quantity,
-            'unit_cost'     => $unitCost->getAmount(),
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+            'quantity' => $quantity,
+            'unit_cost' => $unitCost->getAmount(),
             'profit_margin' => $product->profit_margin,
             'shipping_cost' => $product->shipping_cost,
             'selling_price' => round($sellingPrice->getAmount()),
-            'created_at'    => $this->faker->dateTimeBetween('-1 year'),
+            'created_at' => $this->faker->dateTimeBetween('-1 year'),
         ];
     }
 }

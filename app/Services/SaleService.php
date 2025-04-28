@@ -30,7 +30,7 @@ class SaleService
             return $sellingPrice;
 
         } catch (InvalidArgumentException $e) {
-            throw new InvalidArgumentException('Error calculating selling price: ' . $e->getMessage());
+            throw new InvalidArgumentException('Error calculating selling price: '.$e->getMessage());
         }
     }
 }

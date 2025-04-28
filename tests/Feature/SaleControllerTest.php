@@ -5,9 +5,7 @@ namespace Tests\Feature;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\User;
-use App\Services\SaleService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class SaleControllerTest extends TestCase
@@ -109,7 +107,7 @@ class SaleControllerTest extends TestCase
             'errors' => [
                 'quantity' => ['The quantity must be at least 1.'],
                 'unit_cost' => ['The unit cost must be a number.'],
-            ]
+            ],
         ]);
     }
 
@@ -176,7 +174,7 @@ class SaleControllerTest extends TestCase
             'errors' => [
                 'quantity' => ['The quantity must be at least 1.'],
                 'unit_cost' => ['The unit cost must be a number.'],
-            ]
+            ],
         ]);
     }
 }

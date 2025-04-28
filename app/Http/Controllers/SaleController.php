@@ -6,9 +6,8 @@ use App\Http\Requests\SaleRequest;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Services\SaleService;
-use Carbon\Carbon;
-use InvalidArgumentException;
 use Illuminate\Support\Facades\Auth;
+use InvalidArgumentException;
 
 class SaleController extends Controller
 {
@@ -19,7 +18,7 @@ class SaleController extends Controller
             ->orderBy('sales.created_at', 'desc')
             ->get();
 
-        $products = Product::select('id','name')
+        $products = Product::select('id', 'name')
             ->orderBy('name', 'asc')
             ->get();
 
@@ -27,10 +26,11 @@ class SaleController extends Controller
         $sales = $sales->map(function ($sale) {
             $sale->unit_cost = $sale->unit_cost / 100;
             $sale->selling_price = $sale->selling_price / 100;
+
             return $sale;
         });
 
-        return view('coffee-sales', compact('sales','products'));
+        return view('coffee-sales', compact('sales', 'products'));
     }
 
     public function create(SaleRequest $request)
@@ -39,7 +39,7 @@ class SaleController extends Controller
 
         $product = Product::find($data['product_id']);
 
-        if (!$product) {
+        if (! $product) {
             return response()->json(['error' => 'No product found.'], 404);
         }
 
@@ -71,7 +71,7 @@ class SaleController extends Controller
 
         } catch (InvalidArgumentException $e) {
             return response()->json([
-                'error' => 'Invalid data provided: ' . $e->getMessage(),
+                'error' => 'Invalid data provided: '.$e->getMessage(),
             ], 400);
 
         } catch (\Exception $e) {
@@ -88,7 +88,7 @@ class SaleController extends Controller
 
             $product = Product::find($data['product_id']);
 
-            if (!$product) {
+            if (! $product) {
                 return response()->json(['error' => 'No product found.'], 404);
             }
 
@@ -105,7 +105,7 @@ class SaleController extends Controller
 
         } catch (InvalidArgumentException $e) {
             return response()->json([
-                'error' => 'Invalid data provided: ' . $e->getMessage(),
+                'error' => 'Invalid data provided: '.$e->getMessage(),
             ], 400);
 
         } catch (\Exception $e) {

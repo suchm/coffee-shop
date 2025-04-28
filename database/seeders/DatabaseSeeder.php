@@ -28,6 +28,6 @@ class DatabaseSeeder extends Seeder
             'shipping_cost' => 1000, // In pence
         ]);
 
-//        Sale::factory()->count(10)->create();
+        //        Sale::factory()->count(10)->create();
     }
 }
